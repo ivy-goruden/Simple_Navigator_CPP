@@ -224,6 +224,10 @@ TsmResult s21_GraphAlgorithms::NaiveSalesman(const s21_Graph graph){
     double minDist = __INT_MAX__;
     auto matrix = graph.get_matrix();
 
+    if (vertNum == 0) {
+        return TsmResult{nullptr, 0.0};
+    }
+
     std::vector<int> path(vertNum, 0);
     for (int i = 0; i<vertNum; i++){
         path[i] = i+1;
@@ -231,12 +235,15 @@ TsmResult s21_GraphAlgorithms::NaiveSalesman(const s21_Graph graph){
     do {
         int newDist = 0;
         for (int i = 0; i<vertNum-1; i++){
-            newDist+=matrix[path[i]][path[i+1]];
+            newDist += matrix[path[i] - 1][path[i + 1] - 1];
         }
-        if (newDist<minDist){
+        newDist += matrix[path.back() - 1][path.front() - 1];
+        if (newDist < minDist){
             minDist = newDist;
-            bestPath = new int[vertNum];
+            delete[] bestPath;
+            bestPath = new int[vertNum + 1];
             std::copy(path.begin(), path.end(), bestPath);
+            bestPath[vertNum] = path.front();
         }
     } while (std::next_permutation(path.begin(), path.end()));
     return TsmResult{bestPath, minDist};
@@ -248,6 +255,9 @@ TsmResult s21_GraphAlgorithms::NearestNeighbourSalesman(const s21_Graph graph){
     std::vector<int> result;
     int* bestPath = nullptr;
     double minDist = 0;
+    if (vertNum == 0) {
+        return TsmResult{nullptr, 0.0};
+    }
     std::vector<int> path(vertNum, 0);
     for (int i = 0; i<vertNum; i++){
         path[i] = i+1;
@@ -261,13 +271,15 @@ TsmResult s21_GraphAlgorithms::NearestNeighbourSalesman(const s21_Graph graph){
     std::uniform_int_distribution<> distr(0, path.size() - 1);
 
     // 3. Generate the random index and fetch the element
-    int currVert = path[distr(gen)];
-    result.push_back(currVert+1);
+    int currVert = path[distr(gen)] - 1;
+    result.push_back(currVert + 1);
     while(result.size() < matrix.size()){
         int clothestNeigh = -1;
         double minDirToNeigh = __INT_MAX__;
         for (auto neigh =0; neigh < static_cast<int>(matrix.size()); neigh++){
-            if (matrix[currVert][neigh] != 0 && find(result.begin(), result.end(), neigh-1) == result.end() &&  matrix[currVert][neigh] < minDirToNeigh){
+            if (matrix[currVert][neigh] != 0 &&
+                find(result.begin(), result.end(), neigh + 1) == result.end() &&
+                matrix[currVert][neigh] < minDirToNeigh){
                 minDirToNeigh = matrix[currVert][neigh];
                 clothestNeigh = neigh;
             }
@@ -276,12 +288,14 @@ TsmResult s21_GraphAlgorithms::NearestNeighbourSalesman(const s21_Graph graph){
             throw std::invalid_argument("Graph is not connected");
             return TsmResult{};
         }
-        result.push_back(clothestNeigh+1);
+        result.push_back(clothestNeigh + 1);
+        currVert = clothestNeigh;
         minDist+=minDirToNeigh;
     }
     result.push_back(result.at(0));
+    minDist += matrix[result.at(vertNum - 1) - 1][result.at(0) - 1];
+    bestPath = new int[result.size()];
     std::copy(result.begin(), result.end(), bestPath);
-    minDist+=matrix[result.at(vertNum-1)-1][result.at(0)-1];
     
     return TsmResult{bestPath, minDist};
 }
