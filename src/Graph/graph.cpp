@@ -5,8 +5,12 @@ s21_Graph::s21_Graph() : vertex_count(0), digraph(false) {
 
 }
 s21_Graph::s21_Graph(std::vector<std::vector<int>> m ): matrix(m){
-    if (!matrix.empty() && (matrix.size() != matrix[0].size())){
-        throw std::invalid_argument("Matrix is not square!");
+    if (!matrix.empty()) {
+        for (const auto& row : matrix) {
+            if (row.size() != matrix.size()) {
+                throw std::invalid_argument("Matrix is not square!");
+            }
+        }
     }
     vertex_count = matrix.size();
     if (is_digraph(*this)) {

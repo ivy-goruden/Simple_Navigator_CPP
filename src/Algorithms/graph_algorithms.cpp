@@ -144,8 +144,30 @@ std::vector<std::vector<int>> s21_GraphAlgorithms::GetLeastSpanningTree(s21_Grap
 }
 
 bool s21_GraphAlgorithms::isConnected(s21_Graph &graph){
-    auto visited = s21_GraphAlgorithms::DepthFirstSearch(graph, 1);
-    return static_cast<int>(visited.size()) == graph.get_vertex_count();
+    const int vertexCount = graph.get_vertex_count();
+    if (vertexCount == 0) {
+        return false;
+    }
+
+    const auto matrix = graph.get_matrix();
+    std::vector<bool> visited(vertexCount, false);
+    std::vector<int> pending{0};
+    visited[0] = true;
+
+    while (!pending.empty()) {
+        const int current = pending.back();
+        pending.pop_back();
+        for (int next = 0; next < vertexCount; ++next) {
+            if (matrix[current][next] != 0 && !visited[next]) {
+                visited[next] = true;
+                pending.push_back(next);
+            }
+        }
+    }
+
+    return std::all_of(visited.begin(), visited.end(), [](bool value) {
+        return value;
+    });
 }
 
 bool s21_GraphAlgorithms::isComplete(s21_Graph &graph){
