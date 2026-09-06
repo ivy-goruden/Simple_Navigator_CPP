@@ -131,6 +131,6 @@ class queue {
     }
 };
 
-}  // namespace S21
+}  // namespace s21
 
 #endif

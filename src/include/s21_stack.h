@@ -108,6 +108,6 @@ class stack {
     }
 };
 
-}  // namespace S21
+}  // namespace s21
 
 #endif
